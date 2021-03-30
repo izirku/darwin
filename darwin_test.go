@@ -1,11 +1,10 @@
 package darwin
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
+	"math"
 	"sort"
-	"strings"
 	"testing"
 	"time"
 )
@@ -15,6 +14,8 @@ const (
 	success = "\u2713"
 	failed  = "\u2717"
 )
+
+const float64EqualityThreshold = 1e-9
 
 type dummyDriver struct {
 	CreateError bool
@@ -443,18 +444,23 @@ func TestParse(t *testing.T) {
 		t.Logf("\tTest %d:\tWhen handling the embedded schema.", testID)
 		{
 			migs := ParseMigrations(schemaDoc)
-			var buf bytes.Buffer
-			for _, mig := range migs {
-				buf.WriteString(fmt.Sprintf("-- version: %.1f\n", mig.Version))
-				buf.WriteString(fmt.Sprintf("-- description: %s\n", mig.Description))
-				buf.WriteString(mig.Script)
-			}
-
-			sql := strings.ToLower(schemaDoc)
-			if sql != buf.String() {
-				t.Logf("got: %v", buf.Bytes())
-				t.Logf("exp: %v", []byte(sql))
-				t.Fatalf("\t%s\tTest %d:\tShould be able to parse migrations.", failed, testID)
+			for i, mig := range migs {
+				if math.Abs(mig.Version-expectedMigs[i].Version) > float64EqualityThreshold {
+					t.Logf("got: %f", mig.Version)
+					t.Logf("exp: %f", expectedMigs[i].Version)
+					t.Logf("(threshold exceeded by: %f)", math.Abs(mig.Version-expectedMigs[i].Version)-float64EqualityThreshold)
+					t.Fatalf("\t%s\tTest %d:\tShould be able to parse migrations.", failed, testID)
+				}
+				if mig.Description != expectedMigs[i].Description {
+					t.Logf("got: %s", mig.Description)
+					t.Logf("exp: %s", expectedMigs[i].Description)
+					t.Fatalf("\t%s\tTest %d:\tShould be able to parse migrations.", failed, testID)
+				}
+				if mig.Script != expectedMigs[i].Script {
+					t.Logf("got: %s", mig.Script)
+					t.Logf("exp: %s", expectedMigs[i].Script)
+					t.Fatalf("\t%s\tTest %d:\tShould be able to parse migrations.", failed, testID)
+				}
 			}
 			t.Logf("\t%s\tTest %d:\tShould be able to parse migrations.", success, testID)
 		}
@@ -472,6 +478,8 @@ CREATE TABLE users (
 	date_created  TIMESTAMP,
 	date_updated  TIMESTAMP,
 
+	-- may include full-line only comments,
+	-- trailing comments are not supported
 	PRIMARY KEY (user_id)
 );
 
@@ -502,7 +510,14 @@ CREATE TABLE sales (
 );
 
 -- Version: 2.1
--- Description: Alter table products with user column"
+-- Description: Alter table products with user column
 ALTER TABLE products
 	ADD COLUMN user_id UUID DEFAULT '00000000-0000-0000-0000-000000000000'
 `
+
+var expectedMigs = []Migration{
+	{Version: 1.1, Description: "create table users", Script: " create table users ( user_id       uuid, name          text, email         text unique, roles         text[], password_hash text, date_created  timestamp, date_updated  timestamp, primary key (user_id) );"},
+	{Version: 1.2, Description: "create table products", Script: " create table products ( product_id   uuid, name         text, cost         int, quantity     int, date_created timestamp, date_updated timestamp, primary key (product_id) );"},
+	{Version: 1.3, Description: "create table sales", Script: " create table sales ( sale_id      uuid, product_id   uuid, quantity     int, paid         int, date_created timestamp, primary key (sale_id), foreign key (product_id) references products(product_id) on delete cascade );"},
+	{Version: 2.1, Description: "alter table products with user column", Script: " alter table products add column user_id uuid default '00000000-0000-0000-0000-000000000000'"},
+}

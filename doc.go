@@ -26,6 +26,8 @@ Given this file:
 		date_created  TIMESTAMP,
 		date_updated  TIMESTAMP,
 
+		-- may include full-line only comments,
+		-- trailing comments are not supported
 		PRIMARY KEY (user_id)
 	);
 
