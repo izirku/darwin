@@ -1,5 +1,7 @@
 # Darwin
 
+[![CircleCI](https://circleci.com/gh/izirku/darwin.svg?style=svg)](https://circleci.com/gh/izirku/darwin)
+
 ***note***: this is a temporary repo for internal use and/or tracking pull requests only. Please use the one maintained by Ardan Labs.
 
 Copyright (c) 2016 Claudemiro  
