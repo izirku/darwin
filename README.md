@@ -1,13 +1,16 @@
 # Darwin
 
-[![CircleCI](https://circleci.com/gh/ardanlabs/darwin.svg?style=svg)](https://circleci.com/gh/ardanlabs/darwin)
+***note***: this is a temporary repo for internal use and/or tracking pull requests only. Please use the one maintained by Ardan Labs.
 
 Copyright (c) 2016 Claudemiro  
 Copyright 2021, Ardan Labs  
 info@ardanlabs.com
 
-Project forked from:  
-https://github.com/GuiaBolso/darwin
+Project fork history:  
+
+<https://github.com/ardanlabs/darwin>
+
+<https://github.com/GuiaBolso/darwin>
 
 ## Licensing
 
@@ -37,6 +40,6 @@ SOFTWARE.
 
 ## About The Project
 
-Package darwin provides a database schema evolution api for Go. 
+Package darwin provides a database schema evolution api for Go.
 
 All of the documentation can be found on the [go.dev](https://pkg.go.dev/github.com/ardanlabs/darwin?tab=doc) website.
