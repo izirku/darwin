@@ -124,7 +124,6 @@ func ParseMigrations(s string) []Migration {
 			mig.Description = strings.TrimSpace(v[15:])
 
 		case len(v) == 0 || (len(v) >= 2 && v[:2] == "--"):
-			continue
 
 		default:
 			script += " " + v
